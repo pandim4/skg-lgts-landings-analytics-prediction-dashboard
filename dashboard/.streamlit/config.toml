@@ -1,0 +1,11 @@
+[theme]
+primaryColor = "#00FF41" 
+backgroundColor = "#0B0E14"
+secondaryBackgroundColor = "#1A1C23"
+textColor = "#E0E0E0"
+font = "monospace"
+
+[client]
+# Disables the 'Dark/Light' toggle in the menu to lock your branding
+# showErrorDetails = false
+toolbarMode = "minimal"

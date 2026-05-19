@@ -1,0 +1,17 @@
+services:
+  airport-app:
+    build: .
+    container_name: airport-dashboard
+    ports:
+      - "11501:8501"
+    volumes:
+      - .:/app
+    env:
+      - ../.env
+    networks:
+      - pan_web
+    restart: always
+
+networks:
+  pan_web:
+    driver: bridge
