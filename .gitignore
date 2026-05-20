@@ -21,9 +21,9 @@ __pycache__/
 *.sql
 
 # Images and other media (uncomment if you don't want to push media files to GitHub)
-*.jpg
-*.jpeg
-*.png
+*machine_learning/*.jpg
+*machine_learning/*.jpeg
+*machine_learning/*.png
 
 # OS generated files
 .DS_Store

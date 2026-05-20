@@ -13,24 +13,28 @@ An end-to-end Data Engineering, Analytics, and Machine Learning project analyzin
 
 ## ✨ Features & Visualizations
 
-This project features an extensive **Exploratory Data Analysis (EDA)** module, providing deep insights into the 2024 operational data.
+[cite_start]This project features an extensive **Exploratory Data Analysis (EDA)** module, providing deep insights into the 2024 operational data[cite: 196].
 
 ### 1. 🗺️ Interactive Flight Path Radar & 3D Profiling
-Visualizes actual descent paths and landing trajectories using spatial clustering (DBSCAN) and Plotly 3D maps.
-> **[🖼️ ΠΡΟΣΘΕΣΕ ΕΔΩ SCREENSHOT: 3D Flight Profile]**
+[cite_start]Visualizes actual descent paths and landing trajectories using spatial clustering (DBSCAN) and Plotly 3D maps[cite: 107, 188].
+> ![Dashboard Overview](assets/dashboard_overview.jpg)
 
 ### 2. 🤖 ML Runway Prediction
-Uses a highly tuned Random Forest Classifier to predict the active runway (10, 16, 28, or 34) up to 24 hours in advance. The model achieved an **82% terminal weighted accuracy** based on the 2024 operational metrics.
-> **[🖼️ ΠΡΟΣΘΕΣΕ ΕΔΩ SCREENSHOT: Runway Prediction Metrics]**
+[cite_start]Uses a Random Forest Classifier to predict the active runway (10, 16, 28, or 34) for 2, 12, and 24-hour horizons[cite: 167, 184]. [cite_start]The model achieved an **82% terminal weighted accuracy** based on 2024 data[cite: 7, 266].
+> ![Runway Prediction](assets/runway_prediction.jpg)
 
 ### 3. 🌦️ Advanced Weather & METAR Analysis (EDA)
-Comprehensive **EDA** of local meteorological phenomena in 2024 (e.g., *Vardaris* wind, Sea Breeze) and their impact on aircraft ground speed. Features an interactive Wind Rose chart.
-> **[🖼️ ΠΡΟΣΘΕΣΕ ΕΔΩ SCREENSHOT: Wind Rose Analysis]**
+[cite_start]Comprehensive **EDA** of 2024 meteorological phenomena[cite: 195]. Key findings:
+* [cite_start]**Vardaris (NW) winds** trigger Runway 34 usage 98.2% of the time[cite: 202].
+* [cite_start]**Sea Breezes** shift 93.9% of landings to Runway 16[cite: 202].
+> ![Wind Rose](assets/wind_rose.png)
+> ![Vardaris Conditions](assets/vardaris.png)
 
 ### 4. 🛩️ Temporal & Fleet Analytics (EDA)
-In-depth **EDA** and **temporal analysis** regarding hourly traffic distributions, seasonal peaks, and airline utilization patterns throughout 2024.
-> **[🖼️ ΠΡΟΣΘΕΣΕ ΕΔΩ SCREENSHOT: Fleet Composition/Leaderboard]**
-
+[cite_start]In-depth **EDA** and **temporal analysis** of 2024 traffic[cite: 196].
+* [cite_start]**Traffic Peaks:** Summer months (July-September) with ~2,100 landings/month[cite: 197].
+* [cite_start]**Fleet Insights:** Dominated by Airbus (55.9%) and Boeing (28.9%)[cite: 206].
+> ![Fleet Analysis](assets/airline.png)
 ---
 
 ## 🧠 Architecture & Pipeline 
