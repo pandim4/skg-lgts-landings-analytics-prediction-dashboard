@@ -29,10 +29,10 @@ def calculate_winds(df):
     df['varying_spread'] = df['varying_spread'].fillna(0)
 
     vardaris_direction=340
-    df['wind_is_vardaris'] = (abs((df['wind_dir'] - vardaris_direction + 180) % 360 - 180)<=30) & ((df['wind_speed']>=15) | (df['gust_factor']>1))
+    df['is_wind_vardaris'] = (abs((df['wind_dir'] - vardaris_direction + 180) % 360 - 180)<=30) & ((df['wind_speed']>=15) | (df['gust_factor']>1))
 
     sea_breeze_direction=180
-    df['wind_is_sea_breeze'] = (abs((df['wind_dir'] - sea_breeze_direction + 180) % 360 - 180)<=30) & (df['wind_speed'].between(3, 15))
+    df['is_wind_sea_breeze'] = (abs((df['wind_dir'] - sea_breeze_direction + 180) % 360 - 180)<=30) & (df['wind_speed'].between(3, 15))
 
     def wind_speed_category(speed):
         if speed < 5: return "Calm"
@@ -120,12 +120,13 @@ def pressure_category(pressure):
     elif pressure < 1030: return "High"
     else: return "Very High"
 
-def ceiling_category(ceil, visibility=None):
-    """
-    Determines standard aviation flight rule classifications (LIFR, IFR, MVFR, VFR) 
-    based on combinations of cloud ceilings and horizontal visibility metrics.
-    """
+
+
 def ceiling_category(ceil):
+    """
+Determines standard aviation flight rule classifications (LIFR, IFR, MVFR, VFR) 
+based on cloud ceilings altitudes.
+"""
     if ceil < 500: return 'LIFR'
     elif ceil < 1000: return 'IFR'
     elif ceil <= 3000:  return 'MVFR'
@@ -184,7 +185,7 @@ def calculate_weather_features(weather_df):
     weather_df = weather_df.drop(columns=['wind_gusts','weather_descriptor','weather_precipitation','weather_obscuration','cloud1_height', 'cloud2_height', 'cloud3_height','cloud1_amount', 'cloud2_amount', 'cloud3_amount','cloud1_formation', 'cloud2_formation', 'cloud3_formation'])
 
     timestamp=['timestamp']
-    wind=['wind_dir','wind_direction_category','wind_speed','wind_speed_category','is_wind_vrb','varying_spread','varying_wind_from','varying_wind_to','is_wind_gusty','gust_factor','gust_delta','wind_is_vardaris','wind_is_sea_breeze','headwind_10','crosswind_10','headwind_28','crosswind_28','headwind_16','crosswind_16','headwind_34','crosswind_34']
+    wind=['wind_dir','wind_direction_category','wind_speed','wind_speed_category','is_wind_vrb','varying_spread','varying_wind_from','varying_wind_to','is_wind_gusty','gust_factor','gust_delta','is_wind_vardaris','is_wind_sea_breeze','headwind_10','crosswind_10','headwind_28','crosswind_28','headwind_16','crosswind_16','headwind_34','crosswind_34']
     weather_phenomena=['weather_intensity','weather_category']
     other=['temperature','temperature_category','dew_point','visibility','visibility_category','pressure','pressure_category']
     clouds=['min_clouds_height','clouds_layers','is_ceiling','ceiling_height','ceiling_category','is_convective','convective_height']

@@ -218,16 +218,14 @@ def pressure_category(pressure):
     elif pressure < 1030: return "High"
     else: return "Very High"
 
-def ceiling_category(ceil, visibility=None):
+def ceiling_category(ceil):
     """
-    Determines standard aviation flight rule classifications (LIFR, IFR, MVFR, VFR) 
-    based on combinations of cloud ceilings and horizontal visibility metrics.
-    """
-    if pd.isna(ceil): return "VFR"
-        
-    if ceil < 500 or visibility < 1500: return 'LIFR'
-    elif ceil < 1000 or visibility < 5000: return 'IFR'
-    elif ceil <= 3000 or visibility < 8000: return 'MVFR'
+Determines standard aviation flight rule classifications (LIFR, IFR, MVFR, VFR) 
+based on cloud ceilings altitudes.
+"""
+    if ceil < 500: return 'LIFR'
+    elif ceil < 1000: return 'IFR'
+    elif ceil <= 3000:  return 'MVFR'
     else: return 'VFR'
 
 def calculate_clouds(df):
@@ -252,7 +250,7 @@ def calculate_clouds(df):
     temp_heights = df[height_columns].where(df[amount_columns].isin(ceiling_values).values)
     df['ceiling_height'] = temp_heights.min(axis=1)
     df['is_ceiling'] = df['ceiling_height'].notna()
-    df['ceiling_category'] = df[['ceiling_height', 'visibility']].apply(lambda x: ceiling_category(x['ceiling_height'], x['visibility']), axis=1)
+    df['ceiling_category'] = df['ceiling_height'].apply(ceiling_category)
 
     convective_values = ['CB', 'TCU']
     temp_heights = df[height_columns].where(df[formation_columns].isin(convective_values).values)
@@ -704,7 +702,8 @@ def calculate_random_forest(trees, depth, min_samples_leaf, class_weight, prepro
             max_depth=depth,                  
             min_samples_leaf=min_samples_leaf, 
             min_samples_split=10,             
-            max_features='sqrt',              
+            max_features='sqrt',
+            class_weight=class_weight,              
             bootstrap=True,                   
             oob_score=True,                   
             random_state=42,                  

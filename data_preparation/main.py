@@ -4,7 +4,6 @@ from datetime import datetime
 import pandas as pd
 
 from database import create_table_in_database, get_data_from_database
-from landings_mining import flights_data_mining, quarter_concatenation
 from preprocessing import apply_preprocessing_pipeline_landings, apply_preprocessing_weather, apply_preprocessing_aircrafts_airlines
 from features import calculate_weather_features, calculate_landing_features,calculate_landing_features_extended,calculate_aircraft_features, merge_features
 
