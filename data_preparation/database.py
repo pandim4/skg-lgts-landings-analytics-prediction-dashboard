@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 load_dotenv()
 
@@ -31,6 +31,30 @@ def get_data_from_database(query):
     Returns:
         pd.DataFrame: A DataFrame containing the query results.
     """
-    engine = create_engine(os.getenv('DATABASE_URL'))
+    engine = create_engine(os.getenv('DB_URL'))
     df = pd.read_sql(query, engine)
     return df
+
+
+def execute_sql_script(sql_query):
+    """
+    Executes a complete SQL script containing DDL/DML statements, 
+    automatically filtering out CLI-specific meta-commands.
+
+    Args:
+        sql_query (str): The SQL script text to be executed.
+
+    Returns:
+        None
+    """
+    # Filter out lines that start with '\' (e.g., \connect, \copy, \unrestrict)
+    cleaned_query = "\n".join(
+        line for line in sql_query.splitlines() 
+        if not line.strip().startswith("\\")
+    )
+    
+    engine = create_engine(os.getenv('DB_URL'))
+    
+    with engine.connect() as connection:
+        connection.execute(text(cleaned_query))
+        connection.commit()

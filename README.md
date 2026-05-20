@@ -1,22 +1,56 @@
-# ✈️ SKG Airport Aviation Data Analytics & Dashboard (2024)
+# ✈️ SKG / LGTS Airport Landings Dashboard & ML Runway Prediction
 
-This repository contains the code for my academic thesis project. It is a comprehensive data engineering and machine learning pipeline that collects, processes, and visualizes flight landing data and meteorological conditions (METAR) for **Thessaloniki Airport "Makedonia" (SKG / LGTS)** during the year 2024.
+![Python](https://img.shields.io/badge/Python-3.9-blue?style=for-the-badge&logo=python)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![Plotly](https://img.shields.io/badge/Plotly-3F4F75?style=for-the-badge&logo=plotly&logoColor=white)
+![Scikit-Learn](https://img.shields.io/badge/Scikit_Learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-## 🗂️ Project Structure
-
-The architecture of the project is divided into two independent microservices:
-
-1. **Data Preparation (`data_preparation/`):** Contains Python scripts for data mining via the OpenSky Network, advanced preprocessing (Hampel filters, spatial DBSCAN for trajectory noise removal), and feature engineering (calculating aircraft crosswinds, categorizing weather conditions, handling METAR parsing).
-2. **Dashboard (`dashboard/`):** A Streamlit application, fully containerized with Docker. It features interactive Plotly visualizations, a live geospatial flight path radar, and a pre-configured Machine Learning pipeline (Random Forest) for predicting runway usage configurations.
-
-## 📊 About the Data (2024)
-
-The project relies on real-world aviation and meteorological data from 2024:
-* **Flight Trajectories:** Landing sequences at SKG mined from the OpenSky Network.
-* **Meteorological Data:** Structured METAR reports for the airport.
-* **Aviation Metadata:** Global aircraft specifications (manufacturers, engine types), airline identifiers, and Wake Turbulence Categories (WTC).
+An end-to-end Data Engineering, Analytics, and Machine Learning project analyzing flight landings and weather conditions at **Thessaloniki Airport "Makedonia" (SKG/LGTS)** using a comprehensive **2024 dataset**. The system dynamically processes telemetry and METAR data to predict the active runway configuration.
 
 ---
+
+## ✨ Features & Visualizations
+
+This project features an extensive **Exploratory Data Analysis (EDA)** module, providing deep insights into the 2024 operational data.
+
+### 1. 🗺️ Interactive Flight Path Radar & 3D Profiling
+Visualizes actual descent paths and landing trajectories using spatial clustering (DBSCAN) and Plotly 3D maps.
+> **[🖼️ ΠΡΟΣΘΕΣΕ ΕΔΩ SCREENSHOT: 3D Flight Profile]**
+
+### 2. 🤖 ML Runway Prediction
+Uses a highly tuned Random Forest Classifier to predict the active runway (10, 16, 28, or 34) up to 24 hours in advance. The model achieved an **82% terminal weighted accuracy** based on the 2024 operational metrics.
+> **[🖼️ ΠΡΟΣΘΕΣΕ ΕΔΩ SCREENSHOT: Runway Prediction Metrics]**
+
+### 3. 🌦️ Advanced Weather & METAR Analysis (EDA)
+Comprehensive **EDA** of local meteorological phenomena in 2024 (e.g., *Vardaris* wind, Sea Breeze) and their impact on aircraft ground speed. Features an interactive Wind Rose chart.
+> **[🖼️ ΠΡΟΣΘΕΣΕ ΕΔΩ SCREENSHOT: Wind Rose Analysis]**
+
+### 4. 🛩️ Temporal & Fleet Analytics (EDA)
+In-depth **EDA** and **temporal analysis** regarding hourly traffic distributions, seasonal peaks, and airline utilization patterns throughout 2024.
+> **[🖼️ ΠΡΟΣΘΕΣΕ ΕΔΩ SCREENSHOT: Fleet Composition/Leaderboard]**
+
+---
+
+## 🧠 Architecture & Pipeline 
+
+1. **Data Mining:** Extracts massive historical ADS-B flight data for the year 2024 via the OpenSky Network API.
+2. **Data Cleaning & Preprocessing:** Handles missing values and noise using **Hampel filters** and **DBSCAN**. Includes a **Rule-Based Landing Classifier** to filter out non-landing operations.
+3. **Feature Engineering:** Calculates crosswinds/headwinds and performs cyclical encoding for time variables (sine/cosine transformations) to preserve continuity.
+4. **Machine Learning:** Utilizes a `RandomForestClassifier` with `TimeSeriesSplit` cross-validation to account for temporal data dependencies.
+5. **Database Stack:** Historical 2024 data is stored and analyzed via **PostgreSQL** using the **SQLAlchemy ORM**.
+
+---
+
+## 🚀 Installation & Setup
+
+To run the project locally, ensure you have Docker installed.
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/yourusername/skg-runway-prediction.git](https://github.com/yourusername/skg-runway-prediction.git)
+   cd skg-runway-prediction
 
 ## 🚀 How to Run the Project
 
