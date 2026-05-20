@@ -12,13 +12,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Data folders (uncomment if you don't want to push data to GitHub)
-
-**/data/input/
-**/data/output/
+# Data files (uncomment if you don't want to push data to GitHub)
+*.parquet
+*.csv
 # SQLite databases (if you use local sqlite for testing)
 *.db
 *.sqlite3
+*.sql
 
 # OS generated files
 .DS_Store

@@ -15,32 +15,9 @@ os.makedirs("data/input/quarters_of_landings_data", exist_ok=True)
 os.makedirs("data/input", exist_ok=True)
 os.makedirs("data/output", exist_ok=True)
 
-#Mining the landings data for each quarter and save as csv files.
-
-# Set parameters.
-airport = "LGTS" # Set airport.
-THbounds = (22.910248, 40.476592, 23.028740, 40.566666) # Set the geographical bounds of the area.
-
-# the last date that was found (start dates for each quarter)
-end_dates = [datetime(2023,12,31,23,59,59), datetime(2024,3,31,23,59,59), datetime(2024,6,30,23,59,59), datetime(2024,9,30,23,59,59)]
-# the last date that will be checked now (end dates for each quarter)
-end_points = [datetime(2024,3,31,23,59,59), datetime(2024,6,30,23,59,59), datetime(2024,9,30,23,59,59), datetime(2024,12,31,23,59,59)]
-
-
-RUN_MINING = True
-
-if RUN_MINING and not os.path.exists("data/input/quarters_of_landings_data/quarter_1.csv"):
-    for i in range(len(end_dates)):
-        flights_data_mining(end_dates[i], end_points[i], airport, THbounds, i+1)
-
-# Concatenate the 4 quarter files into one landings_data.csv file.
-quarter_concatenation(len(end_dates))
-
-######
-
 #Load the raw data
 print("Loading raw data...")
-raw_landings_df = pd.read_csv("data/input/quarters_of_landings_data/quarter_1.csv")
+raw_landings_df = pd.read_csv("data/input/landings_data.csv")
 
 raw_weather_df = pd.read_csv("data/input/weather_data.csv")
 
