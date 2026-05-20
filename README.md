@@ -17,11 +17,11 @@ An end-to-end Data Engineering, Analytics, and Machine Learning project analyzin
 
 ### 1. 🗺️ Interactive Flight Path Radar & 3D Profiling
 [cite_start]Visualizes actual descent paths and landing trajectories using spatial clustering (DBSCAN) and Plotly 3D maps[cite: 107, 188].
-> ![Dashboard Overview](assets/dashboard_overview.jpg)
+> ![Dashboard Overview](assets/dashboard_overview.png)
 
 ### 2. 🤖 ML Runway Prediction
 [cite_start]Uses a Random Forest Classifier to predict the active runway (10, 16, 28, or 34) for 2, 12, and 24-hour horizons[cite: 167, 184]. [cite_start]The model achieved an **82% terminal weighted accuracy** based on 2024 data[cite: 7, 266].
-> ![Runway Prediction](assets/runway_prediction.jpg)
+> ![Runway Prediction](assets/runway_prediction.png)
 
 ### 3. 🌦️ Advanced Weather & METAR Analysis (EDA)
 [cite_start]Comprehensive **EDA** of 2024 meteorological phenomena[cite: 195]. Key findings:
