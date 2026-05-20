@@ -6,8 +6,8 @@ services:
       - "11501:8501"
     volumes:
       - .:/app
-    env:
-      - ../.env
+    env_file:   
+      - ./.env
     networks:
       - pan_web
     restart: always
