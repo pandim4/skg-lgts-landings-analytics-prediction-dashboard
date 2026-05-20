@@ -2,8 +2,6 @@ import os
 import streamlit as st
 import pandas as pd
 import sqlalchemy
-
-import requests
 import calendar
 from dotenv import load_dotenv
 from functions import setup_page
@@ -17,12 +15,21 @@ st.subheader("Runway configuration prediction based on time and weather features
 
 st.divider()
 
-#Calling the function to get the latest METAR data
+# Calling the function to get the latest METAR data
 raw_metar, raw_metar_df = get_metar_data()
 
-# Function to prepare the data for machine learning prediction
-def prepare_ml_data(raw_metar_df,time=pd.Timestamp.now().tz_localize('UTC')):
+def prepare_ml_data(raw_metar_df, time=pd.Timestamp.now().tz_localize('UTC')):
+    """
+    Consolidates raw METAR parsing, temporal feature generation, and structural 
+    transformations to output an encoded vector ready for ML prediction.
 
+    Args:
+        raw_metar_df (pd.DataFrame): Dataframe containing the raw METAR string.
+        time (pd.Timestamp, optional): The target timestamp. Defaults to UTC now.
+
+    Returns:
+        tuple: (Encoded feature set for ML input, Parsed weather dataframe, Parsed time dataframe)
+    """
     # Create a DataFrame for time features
     time_df = pd.DataFrame({
         "timestamp": [time],
@@ -32,81 +39,76 @@ def prepare_ml_data(raw_metar_df,time=pd.Timestamp.now().tz_localize('UTC')):
     time_df = apply_time_features(time_df)
 
     # Apply METAR parsing and weather feature engineering to the raw METAR DataFrame
-    raw_metar_df=metar_parser(raw_metar_df)
-    weather_df=calculate_weather_features(raw_metar_df)
+    raw_metar_df = metar_parser(raw_metar_df)
+    weather_df = calculate_weather_features(raw_metar_df)
 
-   # Combine weather and time features into a single DataFrame
+    # Combine weather and time features into a single DataFrame
     final_df = pd.concat([weather_df, time_df], axis=1)
 
     # Remove duplicate columns if any and drop the original timestamp column
     final_df = final_df.loc[:, ~final_df.columns.duplicated()]
     final_df = final_df.drop(columns=['timestamp'])
 
-    #Convert the final DataFrame into a format suitable for machine learning prediction
+    # Convert the final DataFrame into a format suitable for machine learning prediction
     ml_ready_df = data_ml_conversion(final_df)
 
-    #Select only the features that are required for the model prediction
+    # Select only the features that are required for the model prediction
     currentX = ml_ready_df[model_features]
 
-    return currentX,weather_df,time_df
+    return currentX, weather_df, time_df
 
 # Create the machine learning model pipeline and get the list of features used by the model
-model_pipeline,model_features = create_model()
+model_pipeline, model_features = create_model()
 
-#Predict the current runway configuration using the latest METAR data and the machine learning model
-currentX,current_weather_df,current_time_df = prepare_ml_data(raw_metar_df)
-current_predicted_runway = runway_prediction(currentX,model_pipeline)
+# Predict the current runway configuration using the latest METAR data and the machine learning model
+currentX, current_weather_df, current_time_df = prepare_ml_data(raw_metar_df)
+current_predicted_runway = runway_prediction(currentX, model_pipeline)
 
-#Call the function to get the forecasted METAR
+# Call the function to get the forecasted METAR
 metar_forecast_df = get_metar_forecast_df()
 
-#Make predictions for the next 12 hours and 24 hours using the forecasted METAR data and the machine learning model
+# Make predictions for the next 12 hours and 24 hours using the forecasted METAR data and the machine learning model
 predictions = []
 for i in range(len(metar_forecast_df)-1):
-    futureX,future_weather_df,future_time_df = prepare_ml_data(raw_metar_df=pd.DataFrame({'metar': [metar_forecast_df.iloc[i]['metar']]}), time=pd.Timestamp.now().tz_localize('UTC') + pd.Timedelta(hours=i))
-    predicted_runway = runway_prediction(futureX,model_pipeline)
+    futureX, future_weather_df, future_time_df = prepare_ml_data(raw_metar_df=pd.DataFrame({'metar': [metar_forecast_df.iloc[i]['metar']]}), time=pd.Timestamp.now().tz_localize('UTC') + pd.Timedelta(hours=i))
+    predicted_runway = runway_prediction(futureX, model_pipeline)
     predictions.append(predicted_runway[0])
 
-futureX,future_weather_df,future_time_df = prepare_ml_data(raw_metar_df=pd.DataFrame({'metar': [metar_forecast_df.iloc[6]['metar']]}), time=pd.Timestamp.now().tz_localize('UTC') + pd.Timedelta(hours=24))
-predicted_runway = runway_prediction(futureX,model_pipeline)
+futureX, future_weather_df, future_time_df = prepare_ml_data(raw_metar_df=pd.DataFrame({'metar': [metar_forecast_df.iloc[6]['metar']]}), time=pd.Timestamp.now().tz_localize('UTC') + pd.Timedelta(hours=24))
+predicted_runway = runway_prediction(futureX, model_pipeline)
 predictions.append(predicted_runway[0])
 
-column1,column2= st.columns(2,vertical_alignment="center")
+column1, column2 = st.columns(2, vertical_alignment="center")
 
 with column1:
-
     m = st.container()
     m.metric(label="Current Predicted Runway Configuration", value=f"{current_predicted_runway[0]}")
 
 with column2:
-
     st.image(
-        f"gifs/{current_predicted_runway[0]}.gif"
-    , 
-    use_container_width=True
+        f"gifs/{current_predicted_runway[0]}.gif", 
+        use_container_width=True
     )
 
 st.divider()
 
-pred0, pred1, pred2, pred3, pred4, pred5, pred6 = st.columns(7,vertical_alignment="center")
+pred0, pred1, pred2, pred3, pred4, pred5, pred6 = st.columns(7, vertical_alignment="center")
 
 for i, pred in enumerate([pred0, pred1, pred2, pred3, pred4, pred5, pred6]):
     with pred:
         m = st.container()
         if i < len(predictions)-1:
-            #m.metric(label=f"Predicted Runway in {(i+1)*2}h", value=f"{predictions[i]}")
             m.metric(label=f"Predicted Runway\n {(pd.Timestamp.now(tz='UTC').floor('h') + pd.Timedelta(hours=(i+1)*2)).tz_convert('Europe/Athens').strftime('%H:%M')}", value=f"{predictions[i]}")
         else:
             m.metric(label=f"Predicted Runway in {24}h", value=f"{predictions[i]}")
         st.image(
-            f"gifs/{predictions[i]}.gif"
-        , 
-        use_container_width=True
+            f"gifs/{predictions[i]}.gif", 
+            use_container_width=True
         )
 
 i = 0
-while current_predicted_runway==predictions[i] and i < len(predictions)-1:
-    i+=1
+while current_predicted_runway == predictions[i] and i < len(predictions)-1:
+    i += 1
 
 if i < len(predictions)-1:
     if i == 0:
@@ -127,7 +129,6 @@ st.divider()
 col1, col2 = st.columns(2)
 
 with col2:
-    
     st.subheader("Current Weather Conditions")
     st.write(f"**Temperature:** {current_weather_df['temperature'][0]} °C")
     st.write(f"**Weather Phenomena:** {current_weather_df['weather_category'][0]}")
@@ -136,10 +137,8 @@ with col2:
     st.write(f"**Visibility:** {current_weather_df['visibility'][0]} m")
     st.write(f"**Landing Type:** {current_weather_df['ceiling_category'][0]}")
 
-
 with col1:
     st.subheader("Current Time at SKG/LGTS")
-
     st.write(f"**UTC Time:** {current_time_df['timestamp'][0]}")
     st.write(f"**Local Time:** {current_time_df['timestamp'][0].tz_convert('Europe/Athens')}")
     st.write(f"**Time of Day:** {current_time_df['day_period'][0]}")
@@ -159,5 +158,5 @@ st.divider()
 st.write(f"Current raw METAR: {raw_metar}")
 
 st.write(f"Forecasted METARs for the next 12 hours:")
-for i in range(len(metar_forecast_df)-1 ):
+for i in range(len(metar_forecast_df)-1):
     st.write(f"- {metar_forecast_df.iloc[i][['metar','time']].to_dict()}")

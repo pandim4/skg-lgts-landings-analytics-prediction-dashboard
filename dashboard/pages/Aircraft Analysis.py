@@ -14,9 +14,7 @@ engine = sqlalchemy.create_engine(os.getenv('DB_URL'))
 @st.cache_data
 def get_processed_data():
     df = pd.read_sql("SELECT * FROM final_features", engine)
-
     geo_df = pd.read_sql("SELECT timestamp,date,callsign,latitude,longitude,groundspeed,altitude,vertical_rate,onground,models,wtc,engine,manufacturer FROM final_features_extended", engine)
-
     return df, geo_df
 
 setup_page(category="Aircraft", page_title="✈️ Aircraft Analysis")
@@ -33,7 +31,7 @@ m.metric(label="Total Landings", value=f"{len(df):,}")
 st.divider()
 
 st.subheader("Overview of Aircraft Utilization at SKG Airport")
-mm1,mm2,mm3 = st.columns(3)
+mm1, mm2, mm3 = st.columns(3)
  
 mm2.metric(label="Total Unique Callsigns/Flights", value=f"{df['callsign'].nunique():,}",delta=f"{(df['callsign'].nunique()/len(df)*100):.2f}% of total landings")
 mm3.metric("Primary Airline", df['airline'].mode()[0],delta=f"{(df['airline'].value_counts().iloc[0]/len(df)*100):.2f}% of total landings")
@@ -50,8 +48,18 @@ st.divider()
 
 st.subheader("Top 10 Airlines, Countries, Manufacturers & Models")
 
-#Sort out the top 10 categories and group the rest as "Other" for better visualization
 def get_top10_with_other(df, column_name):
+    """
+    Groups a categorical feature by frequency, retains the top 10 most common 
+    entries, and aggregates the remaining records into an 'Other' category.
+
+    Args:
+        df (pd.DataFrame): The input dataset.
+        column_name (str): The categorical column to evaluate.
+
+    Returns:
+        pd.DataFrame: A summarized dataframe containing the top 10 plus 'Other'.
+    """
     count_df = df[column_name].value_counts().reset_index()
     count_df.columns = [column_name, 'Flight Count']
 
@@ -64,8 +72,18 @@ def get_top10_with_other(df, column_name):
 
     return top10_df
 
-#Display a pie chart for the top 10 categories with the "Other" category included
 def pie_chart_with_top10(df, column_name, title, color_map, legend_title):
+    """
+    Generates a donut pie chart visualizing the Top 10 categories of a feature 
+    alongside an aggregated 'Other' group.
+
+    Args:
+        df (pd.DataFrame): The input dataset.
+        column_name (str): The categorical feature to plot.
+        title (str): The chart's main title.
+        color_map (dict): The predefined color dictionary for consistency.
+        legend_title (str): The display title for the legend.
+    """
     top10_df = get_top10_with_other(df, column_name)
 
     fig = px.pie(
@@ -80,11 +98,18 @@ def pie_chart_with_top10(df, column_name, title, color_map, legend_title):
     )
     
     fig.update_layout(legend_title=legend_title)
-
     st.plotly_chart(fig, use_container_width=True)
 
-#Calculate and display a leaderboard with counts and percentages for a given column
-def calculate_and_display_leaderboard(df, column_name,column_title):
+def calculate_and_display_leaderboard(df, column_name, column_title):
+    """
+    Calculates operational frequencies for a specific categorical feature, 
+    computes percentage shares, and renders an interactive Streamlit dataframe.
+
+    Args:
+        df (pd.DataFrame): The input dataset.
+        column_name (str): The column to rank.
+        column_title (str): The display name for the evaluated feature.
+    """
     leaderboard_df = df[column_name].value_counts().reset_index()
     leaderboard_df.columns = [column_title, 'Total Flights']
 
@@ -107,18 +132,15 @@ def calculate_and_display_leaderboard(df, column_name,column_title):
 
 col_left, col_right = st.columns(2)
 
-#Pie charts for Airlines and Countries with "Other" category
 with col_left:
-
     top10_airlines = get_top10_with_other(df, 'airline')
     pie_chart_with_top10(df, 'airline', "Utilisation by Airline (Top 10)", airline_colors, "Airline")
 
 with col_right:
-
     top10_countries = get_top10_with_other(df, 'country')
     pie_chart_with_top10(df, 'country', "Utilisation by Country of Origin (Top 10)", countries_colors, "Country")
 
-# Leaderboards for Airlines and Countries
+# Leaderboards
 calculate_and_display_leaderboard(df, 'airline', 'Airlines')
 calculate_and_display_leaderboard(df, 'country', 'Countries')
 
@@ -126,25 +148,20 @@ st.divider()
 
 col_left, col_right = st.columns(2)
 
-#Pie charts for Manufacturers and Models with "Other" category
 with col_left:
-
     top10_manufacturers = get_top10_with_other(df, 'manufacturer')
     pie_chart_with_top10(df, 'manufacturer', "Utilisation by Manufacturer (Top 10)", manufacturer_colors, "Manufacturer")
 
 with col_right:
-
     top10_models = get_top10_with_other(df, 'models')
     pie_chart_with_top10(df, 'models', "Utilisation by Aircraft Model (Top 10)", model_colors, "Aircraft Model")
 
-# Leaderboards for Manufacturers and Models
 calculate_and_display_leaderboard(df, 'manufacturer', 'Manufacturers')
 calculate_and_display_leaderboard(df, 'models', 'Aircraft Models')
 
 st.divider()
 
 st.subheader("Airline Fleet Composition (Top 10 Airlines & Models)")
-
 
 airlines_fleet = df.groupby(['airline', 'models']).size().reset_index(name='Flight Count')
 airlines_fleet = airlines_fleet[airlines_fleet['airline'].isin(top10_airlines['airline']) & airlines_fleet['models'].isin(top10_models['models'])]
@@ -176,31 +193,39 @@ st.divider()
 
 st.subheader("Number of Flights by Airline per Time")
 
-def plot_flight_distribution_by_time(df, top10_airlines,time_column, time_order, airline_colors,time_title):
+def plot_flight_distribution_by_time(df, top10_airlines, time_column, time_order, airline_colors, time_title):
+    """
+    Plots a grouped histogram highlighting flight volume distribution across a 
+    specific time dimension for the Top 10 operating airlines.
 
+    Args:
+        df (pd.DataFrame): The full dataset.
+        top10_airlines (pd.DataFrame): The subset containing the top 10 airlines.
+        time_column (str): The temporal column to place on the x-axis.
+        time_order (list): The enforced chronological or categorical order.
+        airline_colors (dict): The color mappings for the airlines.
+        time_title (str): The descriptive title for the x-axis.
+    """
     fig_time_airline = px.histogram(
-    top10_airlines.merge(df[time_column], left_on='airline', right_on=df['airline']),
-    x=time_column,
-    color="airline",
-    color_discrete_map=airline_colors,
-    category_orders={time_column: time_order, "airline": top10_airlines['airline'].tolist()},
-    barmode="group",
-    title=f"Flight Distribution by Airline and {time_title}",
-)
+        top10_airlines.merge(df[time_column], left_on='airline', right_on=df['airline']),
+        x=time_column,
+        color="airline",
+        color_discrete_map=airline_colors,
+        category_orders={time_column: time_order, "airline": top10_airlines['airline'].tolist()},
+        barmode="group",
+        title=f"Flight Distribution by Airline and {time_title}",
+    )
     fig_time_airline.update_layout(
-    legend_title_text='Airline',
-    xaxis_title=time_title,
-    yaxis_title="Number of Flights"
-)
+        legend_title_text='Airline',
+        xaxis_title=time_title,
+        yaxis_title="Number of Flights"
+    )
     st.plotly_chart(fig_time_airline, use_container_width=True)
-
 
 plot_flight_distribution_by_time(df, top10_airlines,'day_period', day_period_order, airline_colors,"Time of Day")
 plot_flight_distribution_by_time(df, top10_airlines,'season', ['Winter', 'Spring', 'Summer', 'Autumn'], airline_colors,"Season")
 plot_flight_distribution_by_time(df, top10_airlines,'weekday', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], airline_colors,"Day of the Week")
 plot_flight_distribution_by_time(df, top10_airlines,'is_high_traffic', [True, False], airline_colors,"High Traffic Hours")
-
-
 
 st.subheader("Daily Visits from the same Aircraft at SKG Airport (Top 10 Airlines)")
 
@@ -210,7 +235,6 @@ avg_rotation.columns = ['airline', 'avg_daily_flights_per_aircraft']
 top_rotation_airline = avg_rotation.sort_values(by='avg_daily_flights_per_aircraft', ascending=False).iloc[0]
 top_10_rot = avg_rotation.sort_values(by='avg_daily_flights_per_aircraft', ascending=False).head(10)
 
-# Metrics
 c1, c2 = st.columns(2)
 c1.metric("Max Avg Daily Landings", f"{top_rotation_airline['avg_daily_flights_per_aircraft']:.2f}")
 c2.metric("Most Frequent Operator", top_rotation_airline['airline'])
@@ -241,7 +265,6 @@ st.divider()
 
 st.subheader("Top 10 Aircrafts & Callsign Breakdown")
 
-
 top10_icao_list = df['icao24'].value_counts().head(10).index.tolist()
 df_top10 = df[df['icao24'].isin(top10_icao_list)].copy()
 
@@ -251,9 +274,7 @@ fig_aircrafts = px.bar(
     color='callsign',     
     title="Top 10 Most Utilized Aircrafts by Callsign",
     template="plotly_dark",
-   
 )
-
 
 fig_aircrafts.update_layout(
     yaxis={'categoryorder':'total ascending'}, 
@@ -262,44 +283,37 @@ fig_aircrafts.update_layout(
     xaxis_title="Number of Flights",
     legend_title="Callsign",
     uniformtext_minsize=8, 
-    uniformtext_mode='hide'
+    uniformtext_mode='hide',
+    showlegend=False
 )
 
 fig_aircrafts.update_traces(marker_line_width=0)
-
-# Επειδή τα callsigns μπορεί να είναι πολλά, κρύβουμε το legend για να μη γεμίσει η οθόνη
-fig_aircrafts.update_layout(showlegend=False)
-
 st.plotly_chart(fig_aircrafts, use_container_width=True)
 
 st.divider()
 
 st.subheader("Aircraft Performance Analysis")
 
-# Φιλτράρουμε για χαμηλό υψόμετρο (π.χ. κάτω από 2000 πόδια)
+# Filter for low altitude
 landing_df = geo_df[(geo_df['altitude'] < 2000) & (geo_df['onground'] == False) & (geo_df['groundspeed'] > 90) & (geo_df['wtc'].notnull()) & (geo_df['engine'].notnull())]
-#landing_df = landing_df[landing_df['manufacturer'].isin(['AIRBUS', 'BOEING', 'ATR'])]
 
-landing_df['engine'] = landing_df['engine'].astype(int)
-landing_df['engine'] = landing_df['engine'].astype(str)
+landing_df['engine'] = landing_df['engine'].astype(int).astype(str)
 
 fig = px.scatter(landing_df, 
                  x="groundspeed", 
                  y="vertical_rate",
                  color="models",
-                 facet_col="wtc",          # <--- Αυτό κάνει τη μαγεία
+                 facet_col="wtc",
                  facet_col_wrap=2,
                  facet_row='engine',
                  height=900,
                  template="plotly_dark",
                  category_orders=category_order,
-                 #hover_data=['callsign','airline'], # Η χώρα που προσθέσαμε πριν!
                  color_discrete_map=model_colors,
                  opacity=0.5,
                  title="Stable Approach Check: Vertical Rate vs Ground Speed",
                  labels={"vertical_rate": "Vertical Speed (fpm)", "ground_speed": "Ground Speed (kt)"})
 
-# Προσθήκη γραμμής "ορίου" (π.χ. -1000 fpm θεωρείται συχνά το όριο για stable approach)
 fig.add_hline(y=-1000, line_dash="dash", line_color="red", annotation_text="Limit for Stable Approach")
 fig.update_layout(legend_title="Aircraft Model", xaxis_title="Ground Speed (kt)", yaxis_title="Vertical Speed (fpm)")
 
@@ -309,34 +323,29 @@ avg_groundspeed = landing_df['groundspeed'].mean()
 avg_groundspeed_per_model = landing_df.groupby('models')['groundspeed'].mean().reset_index()
 avg_groundspeed_per_wtc_engine = landing_df.groupby(['wtc', 'engine'])['groundspeed'].mean().reset_index()
 
-
 st.write(f"Average Ground Speed during Approach: {avg_groundspeed:.2f} kt")
 
 with st.expander("See Average Ground Speed by Aircraft Model"):
     avg_groundspeed_per_model.index = avg_groundspeed_per_model.index + 1
     st.dataframe(avg_groundspeed_per_model,
-    column_config={
+        column_config={
             "models": "Aircraft Model",
             "groundspeed": st.column_config.NumberColumn("Avg Ground Speed (kt)", format="%.2f"),
         },
-    use_container_width=True
-
+        use_container_width=True
     )
 
-
 with st.expander("See Average Ground Speed by Wake Turbulence Category and Engines"):
-
     avg_groundspeed_per_wtc_engine = avg_groundspeed_per_wtc_engine.sort_values(by='groundspeed', ascending=False).reset_index(drop=True)
     avg_groundspeed_per_wtc_engine.index = avg_groundspeed_per_wtc_engine.index + 1
     st.dataframe(avg_groundspeed_per_wtc_engine,
-    column_config={
+        column_config={
             "wtc": "Wake Turbulence Category",
             "engine": "Engines",
             "groundspeed": st.column_config.NumberColumn("Avg Ground Speed (kt)", format="%.2f"),
         },
-
-    use_container_width=True)
-
+        use_container_width=True
+    )
 
 fig_density = px.density_heatmap(
     geo_df,
@@ -351,30 +360,19 @@ fig_density = px.density_heatmap(
 fig_density.update_layout(xaxis_title="Ground Speed (kt)", yaxis_title="Altitude (ft)")
 st.plotly_chart(fig_density, use_container_width=True)
 
-
-# 1. Κρατάμε τα Top 12 μοντέλα (για να μην έχουμε άπειρες στήλες)
 box_df = landing_df[landing_df['manufacturer'].isin(['AIRBUS', 'BOEING', 'ATR'])].copy()
 
-# 3. Δημιουργία του Box Plot
 fig_box = px.box(
     box_df, 
     x="models", 
     y="groundspeed", 
     color="manufacturer",
     color_discrete_map=manufacturer_colors,
-    # facet_col="manufacturer", # ΠΡΟΑΙΡΕΤΙΚΑ: Αν θέλεις να σπάσουν σε 3 στήλες
     title="Speed Distribution Grouped by Manufacturer",
     points=False, 
     notched=True,
     template="plotly_dark",
 )
 
-
 fig_box.update_layout(xaxis={'categoryorder':'total descending'},xaxis_title="Aircraft Model", yaxis_title="Ground Speed (kt)", legend_title="Manufacturer")
 st.plotly_chart(fig_box, use_container_width=True)
-
-
-
-
-
-

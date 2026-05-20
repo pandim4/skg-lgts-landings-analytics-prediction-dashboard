@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from database import create_table_in_database, get_data_from_database
 from astral import LocationInfo
 from astral.sun import sun
 import holidays
@@ -126,11 +125,11 @@ def ceiling_category(ceil, visibility=None):
     Determines standard aviation flight rule classifications (LIFR, IFR, MVFR, VFR) 
     based on combinations of cloud ceilings and horizontal visibility metrics.
     """
-    if pd.isna(ceil): return "VFR"
-    if ceil < 500 or visibility < 1500: return 'LIFR'
-    elif ceil < 1000 or visibility < 5000: return 'IFR'
-    elif ceil <= 3000 or visibility < 8000: return 'MVFR'
-    else: return "VFR"
+def ceiling_category(ceil):
+    if ceil < 500: return 'LIFR'
+    elif ceil < 1000: return 'IFR'
+    elif ceil <= 3000:  return 'MVFR'
+    else: return 'VFR'
 
 def calculate_clouds(df):
     """
@@ -154,7 +153,7 @@ def calculate_clouds(df):
     temp_heights = df[height_columns].where(df[amount_columns].isin(ceiling_values).values)
     df['ceiling_height'] = temp_heights.min(axis=1)
     df['is_ceiling'] = df['ceiling_height'].notna()
-    df['ceiling_category'] = df[['ceiling_height', 'visibility']].apply(lambda x: ceiling_category(x['ceiling_height'], x['visibility']), axis=1)
+    df['ceiling_category'] = df[['ceiling_height']].apply(lambda x: ceiling_category(x['ceiling_height']), axis=1)
 
     convective_values=['CB','TCU']
     temp_heights = df[height_columns].where(df[formation_columns].isin(convective_values).values)

@@ -1,8 +1,6 @@
 import pandas as pd
 from traffic.core import Traffic
 from sklearn.cluster import DBSCAN
-from sqlalchemy import create_engine, text
-from database import create_table_in_database, get_data_from_database
 
 def data_reduction(data):
     """

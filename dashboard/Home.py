@@ -12,8 +12,14 @@ engine = sqlalchemy.create_engine(os.getenv('DB_URL'))
 
 @st.cache_data
 def get_processed_data():
-    df = pd.read_sql("SELECT * FROM final_features", engine)
+    """
+    Connects to the database and retrieves the finalized feature datasets 
+    for both standard landings and extended geospatial telemetry.
 
+    Returns:
+        tuple: (Standard features DataFrame, Extended geospatial DataFrame)
+    """
+    df = pd.read_sql("SELECT * FROM final_features", engine)
     geo_df = pd.read_sql("SELECT date,callsign,latitude,longitude,groundspeed,altitude,vertical_rate FROM final_features_extended", engine)
 
     return df, geo_df
@@ -74,7 +80,7 @@ with col_right:
 
     st.plotly_chart(fig_hour, use_container_width=True)
 
-# --- ΕΝΟΤΗΤΑ ΧΑΡΤΗ (ΒΕΛΤΙΩΜΕΝΗ) ---
+# --- MAP SECTION ---
 st.divider()
 st.subheader("📍 Interactive Flight Path Radar")
 
@@ -112,7 +118,7 @@ if not geo_df.empty:
         height=700
     )
 
-    #Layout adjustments
+    # Layout adjustments
     fig_map.update_layout(
         margin={"r":0,"t":0,"l":0,"b":0},
         coloraxis_colorbar=dict(title="Altitude (ft)")
@@ -123,7 +129,7 @@ if not geo_df.empty:
 else:
     st.warning("⚠️ No geospatial data available to display the flight paths.")  
 
-    # Χρήση expander για να παραμένει καθαρό το dashboard
+# Use expander to keep the dashboard clean
 with st.expander("Click to view Raw Data"):
     st.dataframe(df) # Display the entire dataframe interactively
     st.dataframe(geo_df) # Display the entire geospatial dataframe interactively
