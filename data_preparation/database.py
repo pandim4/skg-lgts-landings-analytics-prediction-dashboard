@@ -18,7 +18,7 @@ def create_table_in_database(df, name):
     Returns:
         None
     """
-    engine = create_engine(os.getenv('DATABASE_URL'))
+    engine = create_engine(os.getenv('DB_URL'))
     df.to_sql(name, con=engine, if_exists='replace', index=False)
 
 def get_data_from_database(query):

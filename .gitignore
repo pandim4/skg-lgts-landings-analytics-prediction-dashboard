@@ -20,6 +20,11 @@ __pycache__/
 *.sqlite3
 *.sql
 
+# Images and other media (uncomment if you don't want to push media files to GitHub)
+*.jpg
+*.jpeg
+*.png
+
 # OS generated files
 .DS_Store
 Thumbs.db
