@@ -114,8 +114,8 @@ Historical and processed data stored using:
 ## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/pandim4/skg-landings-analytics-prediction-dashboard.git
-cd skg-landings-analytics-prediction-dashboard
+git clone https://github.com/pandim4/skg-lgts-landings-analytics-prediction-dashboard.git
+cd skg-lgts-landings-analytics-prediction-dashboard
 ```
 
 ---
