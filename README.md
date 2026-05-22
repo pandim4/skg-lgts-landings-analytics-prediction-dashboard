@@ -11,6 +11,10 @@ An end-to-end Data Engineering, Analytics, and Machine Learning project analyzin
 
 ---
 
+🌐 **[Launch Live Interactive Dashboard](http://83.212.89.176:11501/)**
+
+---
+
 # ✨ Features & Visualizations
 
 This project features an extensive **Exploratory Data Analysis (EDA)** module, providing deep insights into the 2024 operational data.
@@ -269,3 +273,15 @@ This will:
 ✅ Time-aware machine learning forecasting
 ✅ Interactive Streamlit dashboard visualization
 ✅ Dockerized deployment workflow
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+# 👥 Developed By
+
+ * **Panagiotis Dimopoulos** - *Aspiring Data Scientist / Data Engineer* | [GitHub](https://github.com/pandim4) | [LinkedIn](https://www.linkedin.com/in/panagiotis-dimopoulos-it)
